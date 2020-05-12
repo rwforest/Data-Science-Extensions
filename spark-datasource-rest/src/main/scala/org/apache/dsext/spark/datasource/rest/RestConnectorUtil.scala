@@ -63,7 +63,7 @@ object RestConnectorUtil {
     httpc = httpc.timeout(connTimeoutMs = connProp(0),
       readTimeoutMs = connProp(1))
 
-    httpc.option(HttpOptions.allowUnsafeSSL)
+    httpc = httpc.option(HttpOptions.allowUnsafeSSL)
 
     if (oauthCredStr == "") {
       httpc = if (userCredStr == "") httpc else {
