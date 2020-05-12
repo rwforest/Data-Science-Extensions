@@ -5,6 +5,14 @@
 - REST based services (for example Address Validation services, Google Search API, Watson Natural Language Processing API, etc.) typically take only one set of input parameters at a time and return the corresponding record(s). However, for many Data Science problems, the same API needs to be called multiple times to account for a large set of different input parameters (e.g. validating the addresses for a set of target customers; getting personality insights from thousands of Tweets; obtaining Provider's details from the NPI registry for a list of potential Doctors, etc.
 
 - This package supports calling the target service API in a distributed way for different input parameter sets. The results are returned in a DataFrame in a Structure specific to the API without the user specifying this schema.
+## Prerequisites
+Java 8 or 1.8
+
+MacOS:
+brew cask install adoptopenjdk8
+
+Linux:
+sudo apt-install adoptopenjdk8
 
 ## Requirements
 
@@ -14,16 +22,25 @@ This library requires Spark 2.0+ .
 
 This library depends on [scalaj_http](https://github.com/scalaj/scalaj-http) package
 
-## Accessing the binary/jar file for this library already available in the release
+The Scala version of the library needs to match the Scala version of the cluster. For example, the latest build for 2.11 can be found here: [https://mvnrepository.com/artifact/org.scalaj/scalaj-http_2.11/2.4.2](https://mvnrepository.com/artifact/org.scalaj/scalaj-http_2.11/2.4.2)
 
-You can try out the binary/jar file for this library by downloading it from the the Release section of the parent repositoty Data-Science-Extensions.
-
-Click to the name of the repository Data-Science_Extensions. Go to the the Release link under the name of the repositoty. ONce you click there you would fine the link for the file spark-datasource-rest_2.11-2.1.0-SNAPSHOT.jar.zip. Download this file. Uncompress the same. Now you have spark-datasource-rest_2.11-2.1.0-SNAPSHOT.jar to use in your Spark Cluster.
+The dependency is needed on the cluster as well.
 
 
 ## Building the jar file
 
-In case you want to build the jar file yourself try the following steps. 
+To build the jar file yourself try the following steps. 
+
+First make sure JAVA_HOME is set. 
+
+Linux:
+```dirname $(dirname $(readlink -f $(which javac)))```
+
+Mac:
+```$(dirname $(readlink $(which javac)))/java_home```
+
+or refer to this guide to make it permanent
+[https://mkyong.com/java/how-to-set-java_home-environment-variable-on-mac-os-x/](https://mkyong.com/java/how-to-set-java_home-environment-variable-on-mac-os-x/)
 
 Clone/Download the master repository (Data-Science-Extensions) in your local system. Go the parent folder (the one which has 'spark-datasource-rest' as one of the sub folders). From the parent older run the command below. This command will create a 'target' folder under the folder 'spark-datasource-rest'. The 'target' folder would have the spark-datasource-rest_2.11-2.1.0-SNAPSHOT.jar which now you can use with any Spark cluster.
 
@@ -260,3 +277,14 @@ curl \
  
  Here is a link to an example Python [Notebook](https://dataplatform.ibm.com/analytics/notebooks/ae63f056-e267-443e-bfc0-b9331f51d68a/view?access_token=0ec63c6e031aa57d065a4e1c4b71733729db43b1490c331a44323cce28725b7d). This notebook shows how to use the Rest Data Source for calling Socrata Open Data API (SODA) data service
     
+## Troubleshooting
+#### SSL handshake alert: unrecognized_name error
+This is due to the domain name is an alias, not a real domain name. It will fail the ```HostnameVerifier``` verification. To resolve this issue, use the ip address along with https and use the option ```HttpOptions.allowUnsafeSSL ```
+
+####  NoClassDefFoundError
+This is due to the Scala version of ```scalaj-http``` library doesn't match the cluster. Make sure to pick the right Scala version in Maven central and install the dependency on the cluster as well.
+
+#### Received fatal alert: handshake_failure
+The Cipher Suites from the API certificate is not supported by the Java version on the cluster.
+
+No known fix yet.
