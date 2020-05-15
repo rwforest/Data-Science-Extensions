@@ -19,8 +19,6 @@ package org.apache.dsext.spark.datasource.rest
 
 import java.io._
 import java.net.{HttpURLConnection, URL, URLEncoder}
-import java.security._
-import javax.net.ssl.{SSLContext, SSLSocketFactory, TrustManagerFactory}
 
 import scala.annotation.switch
 import scala.collection.mutable.ArrayBuffer
@@ -41,17 +39,14 @@ object RestConnectorUtil {
                      userCredStr: String,
                      connStr: String,
                      contentType: String,
-                     respType: String): Any = {
-
-
-    // print("path in callRestAPI : " + uri + " , method : " + method + ", content type : " +
-    //  contentType + ", userId : " + userId + ", userPassword : " + userPassword +
-    // " , data : " + data + "\n")
+                     respType: String,
+                     getHeaderFormat: String,
+                     authToken: String): Any = {
 
 
     var httpc = (method: @switch) match {
-      case "GET" => Http(addQryParmToUri(uri, data)).header("contenty-type",
-                     "application/x-www-form-urlencoded")
+      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header("Accept", "application/json").header(getHeaderFormat, authToken)
+      //.header("Content-Type","application/x-www-form-urlencoded").header("Access-Token", "nmkvocu01i5fsa57tko5ddjcr7")
       case "PUT" => Http(uri).put(data).header("content-type", contentType)
       case "DELETE" => Http(uri).method("DELETE")
       case "POST" => Http(uri).postData(data).header("content-type", contentType)
@@ -93,7 +88,12 @@ object RestConnectorUtil {
   }
 
   private def addQryParmToUri(uri: String, data: String) : String = {
-      if (uri contains "?") uri + "&" + data else uri + "?" + data
+    if (uri contains "?") uri + "&" + data else
+    {
+      val key = URLEncoder.encode(data.split("=")(0))
+      val value = URLEncoder.encode(data.split("=")(1))
+      uri.replace("{key}", key).replace("{value}", value)
+    }
   }
 
   private def convertToQryParm(data: String) : List[(String, String)] = {

@@ -65,7 +65,7 @@ case class RESTRelation(
   private val inputKeys = restOptions.inputKeys
 
   private val inputDf = if (restOptions.inputType == "tableName") {
-        sparkSession.sql(s"select *  from $inputs")
+        sparkSession.sql(s"select * from $inputs")
   }
   else {
         import sparkSession.implicits._
@@ -127,7 +127,7 @@ case class RESTRelation(
 
     val resp = RestConnectorUtil.callRestAPI(restOptions.url, inputDataStr,
            restOptions.method, oauthStr, userCred, connectionStr,
-           contentType, "BODY").asInstanceOf[String]
+           contentType, "BODY", restOptions.getHeaderFormat, restOptions.oauthToken).asInstanceOf[String]
     prepareOutputData(valuesArr, resp)
 
   }
