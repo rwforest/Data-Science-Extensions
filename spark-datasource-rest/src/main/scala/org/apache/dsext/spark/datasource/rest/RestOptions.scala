@@ -81,7 +81,7 @@ class RESTOptions(
   val oauthConsumerSecret = parameters.getOrElse(REST_OAUTH1_CONSUMER_SECRET, "")
   val oauthToken = parameters.getOrElse(REST_OAUTH1_TOKEN, "")
   val oauthTokenSecret = parameters.getOrElse(REST_OAUTH1_TOKEN_SECRET, "")
-  val callStrictlyOnce = parameters.getOrElse(REST_CALL_STRICTLY_ONCE, "N")
+  val callStrictlyOnce = parameters.getOrElse(REST_CALL_STRICTLY_ONCE, "Y")
   val schemaSamplePcnt = parameters.getOrElse(REST_SCHEMA_SAMPLE_PCNT, "30")
 
 }
