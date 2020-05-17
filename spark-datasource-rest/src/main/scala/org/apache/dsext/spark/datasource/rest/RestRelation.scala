@@ -112,6 +112,7 @@ case class RESTRelation(
     }
 
     val inputDataStr = prepareInputData(valuesArr)
+    val inputDataSeq = prepareInputSeq(valuesArr)
 
     val contentType = "application/" + restOptions.postInputFormat
     val userCred = if (restOptions.userId == "") ""
@@ -128,6 +129,7 @@ case class RESTRelation(
     val resp = RestConnectorUtil.callRestAPI(
                restOptions.url,
                inputDataStr,
+               inputDataSeq,
                restOptions.method,
                oauthStr,
                userCred,
@@ -151,8 +153,21 @@ case class RESTRelation(
     }
     else restOptions.postInputFormat match {
         case "json" => RestConnectorUtil.prepareJsonInput(keyArr, valArray)
+        case "x-www-form-urlencoded" => ""
         case "xml" => throw new Exception("XML based input for post is not supported yet")
-        case _ => throw new Exception("Only JSON based input for post is supported now")
+        case _ => throw new Exception("Only JSON and form based input for post is supported now")
+    }
+  }
+
+  private def prepareInputSeq(valArray: Array[String]) : Seq[(String, String)] = {
+
+    val inputDataKeys = restOptions.inputKeys
+    val keyArr = if (inputDataKeys == "") columnNames else inputDataKeys.split(",")
+
+    restOptions.postInputFormat match {
+        case "json" => Seq()
+        case "x-www-form-urlencoded" => RestConnectorUtil.prepareSeqInput(keyArr, valArray)
+        case _ => throw new Exception("Only JSON and form based input for post is supported now")
     }
 
   }

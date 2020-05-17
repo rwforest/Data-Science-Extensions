@@ -34,6 +34,7 @@ object RestConnectorUtil {
 
   def callRestAPI(uri: String,
                      data: String,
+                     dataSeq: Seq[(String, String)],
                      method: String,
                      oauthCredStr: String,
                      userCredStr: String,
@@ -46,12 +47,10 @@ object RestConnectorUtil {
 
 
     var httpc = (method: @switch) match {
-      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header("Accept", "application/json").header(restHeader, authToken)
-      //.header("Content-Type","application/x-www-form-urlencoded").header("Access-Token", "nmkvocu01i5fsa57tko5ddjcr7")
+      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header(restHeader, authToken)
       case "PUT" => Http(uri).put(data).header("content-type", contentType)
       case "DELETE" => Http(uri).method("DELETE")
-      case "POST" => Http(uri).postData(data).header("content-type", contentType)
-      case "LOGIN" => Http(uri).header(restHeader, authToken)
+      case "POST" => if (contentType == "application/json") Http(uri).postData(data).header("content-type", contentType) else Http(uri).postForm(dataSeq)
     }
 
     val conns = connStr.split(":")
@@ -65,11 +64,7 @@ object RestConnectorUtil {
     if (oauthCredStr == "") {
       httpc = if (userCredStr == "") httpc else {
         val usrCred = userCredStr.split(":")
-
-        if (authType == "JSON")
-          httpc.postForm(Seq("email" -> usrCred(0), "password" -> usrCred(1)))
-        else
-          httpc.auth(usrCred(0), usrCred(1))
+        httpc.auth(usrCred(0), usrCred(1))
       }
     }
     else {
@@ -123,6 +118,12 @@ object RestConnectorUtil {
     httpReq.connectFunc(httpReq, conn)
 
     conn.getInputStream
+
+  }
+
+  def prepareSeqInput(keys: Array[String], values: Array[String]) : Seq[(String, String)] = {
+
+    (keys zip values).toSeq
 
   }
 
