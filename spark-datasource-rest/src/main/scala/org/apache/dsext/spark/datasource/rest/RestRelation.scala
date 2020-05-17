@@ -125,9 +125,18 @@ case class RESTRelation(
     // print("in callRest input data str : " + inputDataStr +
     //  ", contentType : " + contentType + "\n")
 
-    val resp = RestConnectorUtil.callRestAPI(restOptions.url, inputDataStr,
-           restOptions.method, oauthStr, userCred, connectionStr,
-           contentType, "BODY", restOptions.getHeaderFormat, restOptions.oauthToken).asInstanceOf[String]
+    val resp = RestConnectorUtil.callRestAPI(
+               restOptions.url,
+               inputDataStr,
+               restOptions.method,
+               oauthStr,
+               userCred,
+               connectionStr,
+               contentType,
+               "BODY",
+               restOptions.restHeaderFormat,
+               restOptions.oauthToken,
+               restOptions.authType).asInstanceOf[String]
     prepareOutputData(valuesArr, resp)
 
   }

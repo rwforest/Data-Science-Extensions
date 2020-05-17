@@ -40,16 +40,18 @@ object RestConnectorUtil {
                      connStr: String,
                      contentType: String,
                      respType: String,
-                     getHeaderFormat: String,
-                     authToken: String): Any = {
+                     restHeader: String,
+                     authToken: String,
+                     authType: String): Any = {
 
 
     var httpc = (method: @switch) match {
-      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header("Accept", "application/json").header(getHeaderFormat, authToken)
+      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header("Accept", "application/json").header(restHeader, authToken)
       //.header("Content-Type","application/x-www-form-urlencoded").header("Access-Token", "nmkvocu01i5fsa57tko5ddjcr7")
       case "PUT" => Http(uri).put(data).header("content-type", contentType)
       case "DELETE" => Http(uri).method("DELETE")
       case "POST" => Http(uri).postData(data).header("content-type", contentType)
+      case "LOGIN" => Http(uri).header(restHeader, authToken)
     }
 
     val conns = connStr.split(":")
@@ -63,7 +65,11 @@ object RestConnectorUtil {
     if (oauthCredStr == "") {
       httpc = if (userCredStr == "") httpc else {
         val usrCred = userCredStr.split(":")
-        httpc.auth(usrCred(0), usrCred(1))
+
+        if (authType == "JSON")
+          httpc.postForm(Seq("email" -> usrCred(0), "password" -> usrCred(1)))
+        else
+          httpc.auth(usrCred(0), usrCred(1))
       }
     }
     else {
