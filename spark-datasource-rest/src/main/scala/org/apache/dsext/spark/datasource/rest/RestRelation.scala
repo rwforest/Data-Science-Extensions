@@ -135,10 +135,11 @@ case class RESTRelation(
                userCred,
                connectionStr,
                contentType,
-               "BODY",
+               restOptions.respType,
                restOptions.restHeaderFormat,
                restOptions.oauthToken,
-               restOptions.authType).asInstanceOf[String]
+               restOptions.authType,
+               restOptions.queryType).asInstanceOf[String]
     prepareOutputData(valuesArr, resp)
 
   }

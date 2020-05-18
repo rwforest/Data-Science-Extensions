@@ -43,11 +43,12 @@ object RestConnectorUtil {
                      respType: String,
                      restHeader: String,
                      authToken: String,
-                     authType: String): Any = {
+                     authType: String,
+                     queryType: String): Any = {
 
 
     var httpc = (method: @switch) match {
-      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(uri, data)) else Http(addQryParmToUri(uri, data)).header(restHeader, authToken)
+      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(queryType, uri, data)) else Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken)
       case "PUT" => Http(uri).put(data).header("content-type", contentType)
       case "DELETE" => Http(uri).method("DELETE")
       case "POST" => if (contentType == "application/json") Http(uri).postData(data).header("content-type", contentType) else Http(uri).postForm(dataSeq)
@@ -88,13 +89,22 @@ object RestConnectorUtil {
     resp
   }
 
-  private def addQryParmToUri(uri: String, data: String) : String = {
-    if (uri contains "?") uri + "&" + data else
+  private def addQryParmToUri(queryType: String, uri: String, data: String) : String = {
+    if (queryType.toLowerCase == "querystring")
     {
+      if (uri contains "?") uri + "&" + data else uri + "?" + data
+    }
+    else if (queryType.toLowerCase == "inline")
+    {
+      if (data contains "&")
+        throw new Exception("Please limit to 1 row for inline")
+
       val key = URLEncoder.encode(data.split("=")(0))
       val value = URLEncoder.encode(data.split("=")(1))
       uri.replace("{key}", key).replace("{value}", value)
     }
+    else
+      throw new Exception("Only querystring or inline are supported")
   }
 
   private def convertToQryParm(data: String) : List[(String, String)] = {

@@ -83,7 +83,8 @@ class RESTOptions(
   val oauthTokenSecret = parameters.getOrElse(REST_OAUTH1_TOKEN_SECRET, "")
   val callStrictlyOnce = parameters.getOrElse(REST_CALL_STRICTLY_ONCE, "Y")
   val schemaSamplePcnt = parameters.getOrElse(REST_SCHEMA_SAMPLE_PCNT, "30")
-
+  val queryType = parameters.getOrElse(REST_QUERY_TYPE, "querystring")
+  val respType = parameters.getOrElse(REST_RESPONSE_TYPE, "BODY")
 }
 
 object RESTOptions {
@@ -117,4 +118,6 @@ object RESTOptions {
   val REST_OAUTH1_TOKEN_SECRET = newOption("oauthTokenSecret")
   val REST_CALL_STRICTLY_ONCE = newOption("callStrictlyOnce")
   val REST_SCHEMA_SAMPLE_PCNT = newOption("schemaSamplePcnt")
+  val REST_QUERY_TYPE = newOption("queryType")
+  val REST_RESPONSE_TYPE = newOption("respType")
 }
