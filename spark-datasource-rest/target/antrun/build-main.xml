@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <mkdir dir="/Users/jasonyip/Downloads/github/Data-Science-Extensions/spark-datasource-rest/target/tmp"/>
+</target>
+</project>
