@@ -139,8 +139,9 @@ case class RESTRelation(
                restOptions.restHeaderFormat,
                restOptions.oauthToken,
                restOptions.authType,
-               restOptions.queryType).asInstanceOf[String]
-    prepareOutputData(valuesArr, resp)
+               restOptions.queryType,
+               restOptions.cookie).asInstanceOf[(String, String)]
+    prepareOutputData(valuesArr, resp._1, resp._2)
 
   }
 
@@ -173,7 +174,7 @@ case class RESTRelation(
 
   }
 
-  private def prepareOutputData(valArray: Array[String], outputStr: String) : String = {
+  private def prepareOutputData(valArray: Array[String], outputStr: String, cookie: String) : String = {
 
     val includeInputFlg = restOptions.includeInputsInOutput
 
@@ -183,7 +184,7 @@ case class RESTRelation(
     if(includeInputFlg == "N") outputStr else {
 
         restOptions.outputFormat match {
-           case "json" => RestConnectorUtil.prepareJsonOutput(keyArr, valArray, outputStr)
+           case "json" => RestConnectorUtil.prepareJsonOutput(keyArr, valArray, outputStr, cookie)
            case "xml" => throw new Exception("XML output including Input keys is not supported yet")
            case "csv" => throw new Exception("CSV output including Input keys is not supported yet")
            case  _ => throw new Exception("Only JSON  output including Input keys is supported now")
