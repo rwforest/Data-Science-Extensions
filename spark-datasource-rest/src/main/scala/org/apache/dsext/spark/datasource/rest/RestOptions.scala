@@ -85,6 +85,7 @@ class RESTOptions(
   val schemaSamplePcnt = parameters.getOrElse(REST_SCHEMA_SAMPLE_PCNT, "30")
   val queryType = parameters.getOrElse(REST_QUERY_TYPE, "querystring")
   val respType = parameters.getOrElse(REST_RESPONSE_TYPE, "BODY")
+  val cookie = parameters.getOrElse(REST_COOKIE, "")
 }
 
 object RESTOptions {
@@ -120,4 +121,5 @@ object RESTOptions {
   val REST_SCHEMA_SAMPLE_PCNT = newOption("schemaSamplePcnt")
   val REST_QUERY_TYPE = newOption("queryType")
   val REST_RESPONSE_TYPE = newOption("respType")
+  val REST_COOKIE = newOption("cookie")
 }

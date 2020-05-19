@@ -18,7 +18,7 @@
 package org.apache.dsext.spark.datasource.rest
 
 import java.io._
-import java.net.{HttpURLConnection, URL, URLEncoder}
+import java.net.{HttpURLConnection, URL, URLEncoder, HttpCookie}
 
 import scala.annotation.switch
 import scala.collection.mutable.ArrayBuffer
@@ -30,7 +30,6 @@ import scalaj.http.{Http, HttpOptions, Token}
  */
 
 object RestConnectorUtil {
-
 
   def callRestAPI(uri: String,
                      data: String,
@@ -44,11 +43,31 @@ object RestConnectorUtil {
                      restHeader: String,
                      authToken: String,
                      authType: String,
-                     queryType: String): Any = {
+                     queryType: String,
+                     cookie: String): Any = {
 
 
     var httpc = (method: @switch) match {
-      case "GET" => if (authToken.isEmpty) Http(addQryParmToUri(queryType, uri, data)) else Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken)
+      case "GET" =>
+        {
+          if (authToken.isEmpty && cookie.isEmpty)
+            Http(addQryParmToUri(queryType, uri, data))
+          else
+          {
+            // Either cookie or auth token is needed, not both
+            if (cookie.nonEmpty)
+            {
+              val co = cookie.split("=")
+
+              if (co.length > 0)
+                Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken).cookie(co(0), co(1))
+              else
+                throw new Exception("Cookie must be in the format of Name=Value")
+            }
+            else
+              Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken)
+          }
+        }
       case "PUT" => Http(uri).put(data).header("content-type", contentType)
       case "DELETE" => Http(uri).method("DELETE")
       case "POST" => if (contentType == "application/json") Http(uri).postData(data).header("content-type", contentType) else Http(uri).postForm(dataSeq)
@@ -86,7 +105,11 @@ object RestConnectorUtil {
       case "LOCATION" => httpc.asString.location.mkString(" ")
     }
 
-    resp
+    val outCookie : String = (respType : @switch) match {
+      case "BODY" => if (httpc.asString.cookies.nonEmpty) httpc.asString.cookies(0).toString else ""
+    }
+
+    (resp, outCookie)
   }
 
   private def addQryParmToUri(queryType: String, uri: String, data: String) : String = {
@@ -104,7 +127,7 @@ object RestConnectorUtil {
       uri.replace("{key}", key).replace("{value}", value)
     }
     else
-      throw new Exception("Only querystring or inline are supported")
+      throw new Exception("Only querystring and inline are supported")
   }
 
   private def convertToQryParm(data: String) : List[(String, String)] = {
@@ -167,7 +190,7 @@ object RestConnectorUtil {
 
   }
 
-  def prepareJsonOutput(keys: Array[String], values: Array[String], resp: String) : String = {
+  def prepareJsonOutput(keys: Array[String], values: Array[String], resp: String, cookie: String) : String = {
 
     val keysLength = keys.length
     var cnt = 0
@@ -177,6 +200,9 @@ object RestConnectorUtil {
         outArrB += "\"" + keys(cnt) + "\":\"" + values(cnt) + "\""
         cnt += 1
     }
+
+    if (cookie.nonEmpty)
+      outArrB += "\"cookie\":\"" + cookie + "\""
 
     "{" + outArrB.mkString(",") +  ",\"output\":" + resp + "}"
 
