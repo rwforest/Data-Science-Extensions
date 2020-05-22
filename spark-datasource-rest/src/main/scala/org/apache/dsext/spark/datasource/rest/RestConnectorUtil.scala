@@ -60,7 +60,10 @@ object RestConnectorUtil {
               val co = cookie.split("=")
 
               if (co.length > 0)
-                Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken).cookie(co(0), co(1))
+                if (authToken.nonEmpty)
+                  Http(addQryParmToUri(queryType, uri, data)).header(restHeader, authToken).cookie(co(0), co(1))
+                else
+                  Http(addQryParmToUri(queryType, uri, data)).cookie(co(0), co(1))
               else
                 throw new Exception("Cookie must be in the format of Name=Value")
             }
