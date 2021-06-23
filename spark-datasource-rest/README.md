@@ -12,7 +12,7 @@ MacOS:
 brew cask install adoptopenjdk8
 
 Linux:
-sudo apt-install adoptopenjdk8
+sudo apt-get install adoptopenjdk8
 
 ## Requirements
 
